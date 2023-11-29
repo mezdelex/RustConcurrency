@@ -1,8 +1,31 @@
 use std::{
+    cell::RefCell,
+    rc::Rc,
     sync::{mpsc::channel, Arc, Mutex},
     thread::{sleep, spawn},
     time::Duration,
 };
+
+struct RustOwnership;
+
+impl RustOwnership {
+    fn another_owner(message: Rc<RefCell<String>>) {
+        // https://github.com/rust-lang/rust/issues/39232 <- careful with this issue;
+        // autoimports may cause unwanted behavior if std::borrow::BorrowMut gets imported while using borrow_mut().
+        // we want RefCell.borrow_mut(), not std::borrow::BorrowMut
+        let mut mutable_message = message.borrow_mut();
+        *mutable_message += "!!!";
+    }
+
+    fn allow_mutability_of_immutable_elements_by_different_owners() {
+        let message = Rc::new(RefCell::new(String::from("I shall mutate this")));
+        let message_clone = Rc::clone(&message);
+
+        Self::another_owner(message_clone);
+
+        println!("{}", message.borrow());
+    }
+}
 
 struct RustConcurrency;
 
@@ -59,6 +82,8 @@ impl RustConcurrency {
 }
 
 fn main() {
+    RustOwnership::allow_mutability_of_immutable_elements_by_different_owners();
+    sleep(Duration::from_millis(1000));
     RustConcurrency::using_join_handlers();
     sleep(Duration::from_millis(1000));
     RustConcurrency::concurrent_thread_safety_with_arc();

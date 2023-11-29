@@ -1,3 +1,3 @@
-# Rust Concurrency
+# Rust Examples
 
-Concurrency related exercises in Rust.
+All kind of different exercises in Rust.
