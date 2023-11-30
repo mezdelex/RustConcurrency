@@ -1,3 +1,5 @@
+mod linkedlist;
+use linkedlist::LinkedList;
 use std::{
     cell::RefCell,
     rc::Rc,
@@ -24,6 +26,28 @@ impl RustOwnership {
         Self::another_owner(message_clone);
 
         println!("{}", message.borrow());
+    }
+}
+
+struct RustHeapAllocation;
+
+impl RustHeapAllocation {
+    fn using_box_with_linkedlist_and_recursive_value() {
+        // this is my own LinkedList whose mod is at linkedlist.rs
+        // you need to import the content of the file by using 'mod filename.rs'
+        // only pub elements will be accessible from here
+        let mut new_list: LinkedList<String> = LinkedList::new();
+
+        new_list.push_back("Lol".to_string());
+        new_list.push_front("Such wow".to_string());
+        new_list.push_back("rofllelemeio".to_string());
+        new_list.push_back("kekw".to_string());
+        new_list.push_back("x'D".to_string());
+
+        let popped_value = new_list.pop_front().unwrap();
+        println!("This is the popped_value: {popped_value}");
+
+        new_list.iter().for_each(|value| println!("{value}"));
     }
 }
 
@@ -83,6 +107,8 @@ impl RustConcurrency {
 
 fn main() {
     RustOwnership::allow_mutability_of_immutable_elements_by_different_owners();
+    sleep(Duration::from_millis(1000));
+    RustHeapAllocation::using_box_with_linkedlist_and_recursive_value();
     sleep(Duration::from_millis(1000));
     RustConcurrency::using_join_handlers();
     sleep(Duration::from_millis(1000));
